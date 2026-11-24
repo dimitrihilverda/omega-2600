@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omega 2600</title>
+<meta name="description" content="Omega 2600 is a cartridge for the Commodore 64 with an Atari 2600 cartridge slot on top. A Raspberry Pi RP2350 inside reads the Atari cartridge, emulates the 2600 and writes every frame straight into the C64&#x27;s memory, so the C64 itself shows the picture. Designed, checked on the computer, not built yet.">
+<meta property="og:title" content="Omega 2600 / Design Log, Atari 2600 Cartridges on the Commodore 64">
+<meta property="og:description" content="Omega 2600 is a cartridge for the Commodore 64 with an Atari 2600 cartridge slot on top. A Raspberry Pi RP2350 inside reads the Atari cartridge, emulates the 2600 and writes every frame straight into the C64&#x27;s memory, so the C64 itself shows the picture. Designed, checked on the computer, not built yet.">
+<meta property="og:image" content="https://dimitrihilverda.github.io/omega-2600/img/omega2600-01-enclosure-with-cartridge.png">
+<meta property="og:url" content="https://dimitrihilverda.github.io/omega-2600/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f5f2; --panel: #ffffff; --text: #1d2026; --muted: #5d636d; --line: #e1ded7;
+  --accent: #b5651d; --accent-2: #3a6ea5; --code: #efece6;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #15171b; --panel: #1d2026; --text: #e7e8ea; --muted: #9aa0a8; --line: #2c3038;
+          --accent: #e0954a; --accent-2: #7fb0e0; --code: #252930; }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text);
+       font: 17px/1.65 Inter, "Segoe UI", system-ui, sans-serif; }
+a { color: var(--accent-2); }
+header { border-bottom: 1px solid var(--line); background: var(--panel); }
+.bar { max-width: 860px; margin: 0 auto; padding: 14px 16px; display: flex; gap: 12px; align-items: baseline;
+       font-family: "JetBrains Mono", Consolas, monospace; font-size: 14px; color: var(--muted); }
+.bar b { color: var(--accent); letter-spacing: .08em; }
+main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; margin: 0 0 12px; letter-spacing: -.01em; }
+.lede { color: var(--muted); font-size: 19px; margin: 0 0 24px; }
+.status { display: inline-block; font: 600 13px "JetBrains Mono", Consolas, monospace; color: var(--accent);
+          border: 1px solid var(--accent); border-radius: 999px; padding: 2px 12px; margin-bottom: 20px; }
+h2 { font-size: 24px; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+figure { margin: 24px 0; }
+figure img { display: block; width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line);
+             background: #fff; }
+figcaption { color: var(--muted); font-size: 14.5px; margin-top: 8px; }
+.hero img { border-radius: 14px; }
+ul, ol { padding-left: 22px; }
+li { margin: 6px 0; }
+footer { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; color: var(--muted); font-size: 14px;
+         border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header><div class="bar"><b>OMEGAWARE</b><span>Omega 2600</span></div></header>
+<main>
+  <span class="status">design stage &middot; not built yet</span>
+  <h1>Omega 2600 / Design Log, Atari 2600 Cartridges on the Commodore 64</h1>
+  <p class="lede">Omega 2600 is a cartridge for the Commodore 64 with an Atari 2600 cartridge slot on top. A Raspberry Pi RP2350 inside reads the Atari cartridge, emulates the 2600 and writes every frame straight into the C64&#x27;s memory, so the C64 itself shows the picture. Designed, checked on the computer, not built yet.</p>
+  <figure class="hero"><img src="img/omega2600-01-enclosure-with-cartridge.png" alt="Render of the Omega 2600 enclosure with an Atari 2600 cartridge in its slot"><figcaption>The design: an Atari 2600 cartridge standing in the Omega 2600, which plugs into the C64.</figcaption></figure>
+<p>The Commodore 64 and the Atari 2600 sat in the same living rooms, but never in the same slot. <strong>Omega 2600</strong> is my attempt to change that: a cartridge for the C64's expansion port with an Atari 2600 cartridge slot on top. Plug in an original Atari cartridge, switch on the C64, and play.</p>
+
+<p>Inside sits a Raspberry Pi RP2350. It reads the Atari cartridge, runs the 2600 in emulation, and writes every frame straight into the C64's memory. The picture comes out of the C64's own video chip, on the C64's own monitor. The joysticks are the C64's joystick ports, which are Atari compatible anyway.</p>
+
+<p>This page is the design log so far. Nothing has been built yet: the board and the enclosure are designed and checked on the computer, the picture converter runs on the PC, and the first boards still have to be ordered.</p>
+
+<h2>1. How it works</h2>
+
+<figure><a href="img/omega2600-02-block-diagram.png"><img src="img/omega2600-02-block-diagram.png" alt="Block diagram: C64 expansion port, RP2350 module, shift registers, Atari cartridge slot, microSD and audio jack" loading="lazy"></a><figcaption>Block diagram of the carrier board.</figcaption></figure>
+
+<ul>
+<li><b>The Atari cartridge.</b> A 2600 cartridge is a 5 V ROM with 13 address lines and 8 data lines. The cartridge slot has its own little bus behind three shift registers (two 74HCT595 for the address, one 74HCT165 for the data), so the RP2350 reads the cartridge at its own pace, independent of the C64. At power-on it copies the whole ROM into its own memory, bank switching included.</li>
+<li><b>Or a microSD card.</b> Without a cartridge in the slot, the C64 shows a menu with the ROM files on a microSD card. A ROM file then takes the same path as a dumped cartridge.</li>
+<li><b>The emulator.</b> The RP2350 runs the 2600: the 6507 CPU, the TIA video and sound chip, and the RIOT. It produces frames of 160 pixels wide.</li>
+<li><b>The picture.</b> Each frame is converted into a C64 multicolor bitmap. The RP2350 halts the C64's CPU with the DMA line and writes the changed bytes straight into C64 memory, the way a RAM expansion unit does. The C64 just shows its bitmap.</li>
+<li><b>Controls.</b> The C64's joystick ports take Atari joysticks and paddles. The console switches (Reset, Select, difficulty) go on the function keys.</li>
+<li><b>Sound.</b> Still open: approximate the TIA with the SID, or use the audio jack on the cartridge. The board has the jack, so both stay possible.</li>
+</ul>
+
+<p>The controller is a WeAct Studio RP2350B Core Board: about four euros, with all 48 GPIOs of the RP2350B on its headers. The C64 bus goes to those pins directly. The RP2350's inputs take 5 V as long as its own 3.3 V supply is up, and both supplies come from the C64's 5 V rail.</p>
+
+<h2>2. 128 colours into 16</h2>
+
+<p>The first piece of real code is the frame converter. It turns a 2600 frame into exactly the bytes the C64's VIC-II chip needs: bitmap, screen RAM, colour RAM and a background colour per row of cells. It is plain C without memory allocation, so the same code runs on the PC and on the RP2350.</p>
+
+<p>Two things limit the picture:</p>
+
+<ul>
+<li><b>16 colours instead of 128.</b> This is where nearly all the loss is. Shades that differ on the Atari can become the same C64 colour. Dithering, a checkerboard of two C64 colours of similar brightness, keeps such shades apart.</li>
+<li><b>Four colours per 4 x 8 pixel cell.</b> This hardly matters: in the test scenes at most 1% of the pixels get another colour, and only when the colour changes on every scanline.</li>
+</ul>
+
+<figure><a href="img/omega2600-03-converter-jungle.png"><img src="img/omega2600-03-converter-jungle.png" alt="A jungle test scene: Atari original, C64 with solid colours, C64 with dithering" loading="lazy"></a><figcaption>Left the Atari 2600 frame, in the middle the C64 version with solid colours only, right the C64 version with dithering.</figcaption></figure>
+<figure><a href="img/omega2600-04-converter-sunset.png"><img src="img/omega2600-04-converter-sunset.png" alt="A sunset test scene: Atari original, C64 with solid colours, C64 with dithering" loading="lazy"></a><figcaption>A colour gradient is the hardest case: here the dithering earns its keep.</figcaption></figure>
+
+<p>The converter keeps a colour in the same slot from frame to frame, so only bytes that really change have to be written. The test scenes need about 20 to 130 bytes per frame; a full-screen colour cycle needs about 4,200. A C64 frame has room for roughly 17,000 DMA writes. That is an estimate; it has not been measured yet.</p>
+
+<p>The scenes are synthetic, because the emulator does not exist yet, and the Atari palette comes from a model. Both still have to be checked against real games.</p>
+
+<h2>3. The board</h2>
+
+<figure><a href="img/omega2600-05-board-3d.jpg"><img src="img/omega2600-05-board-3d.jpg" alt="3D render of the Omega 2600 carrier board" loading="lazy"></a><figcaption>The carrier board in KiCad. The RP2350 module goes on the two double header rows, the Atari slot on the two rows in between.</figcaption></figure>
+
+<p>The carrier board is 82 x 90 mm, two layers, and nothing on it is drawn by hand. One file describes which signal goes to which pin. A script checks it: every signal on exactly one pin, 5 V signals only on pins that take 5 V, the bus signals inside the window the RP2350's programmable I/O can reach. The same file generates the pin table for the firmware, the parts and nets for the board, and their positions, which come from the enclosure dimensions. An autorouter then lays the tracks: 1,159 track segments and 82 vias, with the design rule check clean.</p>
+
+<figure><a href="img/omega2600-06-board-routed.png"><img src="img/omega2600-06-board-routed.png" alt="The routed tracks of the carrier board, top side red, bottom side blue" loading="lazy"></a><figcaption>The autorouted tracks, component side in red, bottom side in blue, ground planes left out.</figcaption></figure>
+
+<p>At the bottom of the board are the 44 gold contacts for the C64's expansion port. The RP2350 module sits on headers in the middle, the Atari slot in front of it, and along the back edge the microSD card, the module's USB-C port and the audio jack. A Schottky diode feeds the C64's 5 V to the module, so a USB cable on the module cannot push power back into the C64.</p>
+
+<h2>4. The enclosure</h2>
+
+<figure><a href="img/omega2600-07-enclosure-top.png"><img src="img/omega2600-07-enclosure-top.png" alt="The enclosure seen from above, with the engraved OmegaWare 2600 logo" loading="lazy"></a><figcaption>From above: the OmegaWare logo on the roof, the well for the Atari cartridge, and the narrow part that goes into the C64.</figcaption></figure>
+
+<p>The enclosure is 3D printable, in two halves. The front part has exactly the cross-section of a C64 cartridge, so it slides into the expansion port like any other. Behind that it widens towards the outer side of the C64, clear of its video and serial connectors, and the Atari cartridge stands upright in a well on top. The OmegaWare logo with "2600" under it is engraved in the roof.</p>
+
+<figure><a href="img/omega2600-08-enclosure-inside.png"><img src="img/omega2600-08-enclosure-inside.png" alt="The bottom shell with the carrier board, the RP2350 module and the cartridge connector" loading="lazy"></a><figcaption>Inside: the board in the bottom shell, the module on its headers, and the cartridge connector on its two header strips.</figcaption></figure>
+
+<p>The hardest part was making an Atari cartridge fit, because nothing about it is documented. The board inside an Atari cartridge sits 12.7 mm up inside its shell and 1.4 mm off centre, and Atari's own cartridges have a dust cover that only opens when two blades push into slots beside the board. I read those numbers off a detailed 3D model of a cartridge; they still have to be checked with a caliper on a real one.</p>
+
+<p>Those numbers decide where the cartridge connector has to be: high enough that the cartridge board reaches 8.4 mm into it while the cartridge rests on the floor of the well. A standard connector sits too low. I went through three options:</p>
+
+<ul>
+<li>a Sullins connector with long wire wrap pins on a printed spacer: solid, but made to order;</li>
+<li>an EDAC 395 with the same long pins: also good, nine weeks lead time;</li>
+<li>a WingTAT connector of about sixty cents, plugged into two ordinary 8.5 mm female header strips. That is the one for the first prototype: everything is in stock, in the same order as the board.</li>
+</ul>
+
+<figure><a href="img/omega2600-09-enclosure-front.png"><img src="img/omega2600-09-enclosure-front.png" alt="The enclosure seen from the C64 side, with the edge connector" loading="lazy"></a><figcaption>Seen from the C64 side: the board edge with the 44 contacts for the expansion port.</figcaption></figure>
+
+<p>A build script checks the whole assembly before it writes the files for the printer: the board, the module and the connector must not touch either shell, the front must be exactly a C64 cartridge, an inserted Atari cartridge must reach the contacts without bottoming out, and the dust cover blades must stay clear of the connector.</p>
+
+<h2>5. What's next</h2>
+
+<ol>
+<li>Review the board by hand, then order it.</li>
+<li>Measure a real Atari cartridge, and print a test piece of the well.</li>
+<li>Firmware: read a cartridge, the SD card menu, the emulator, and the DMA writer that puts the frames into the C64.</li>
+<li>The C64 side: the boot program, the ROM menu, the joystick and key handling.</li>
+</ol>
+
+<p>Two things will only be settled on the first board. Which way round an Atari cartridge goes in: the contact order comes from a cartridge board where pins 1 to 12 face the label, but one reader project says the opposite. And whether the RP2350 on my modules is the chip revision that officially takes 5 V on its inputs.</p>
+
+<p>This design log also appears on my site, <a href="https://retroshop.hilverda.eu/project/omega-2600-design-log-atari-2600-cartridges-on-the-commodore-64">retroshop.hilverda.eu</a>.</p>
+
+<p><em>To be continued.</em></p>
+</main>
+<footer>Omega 2600 is an OmegaWare project. Atari and Commodore are trademarks of their respective owners; this project is not affiliated with either.</footer>
+</body>
+</html>
